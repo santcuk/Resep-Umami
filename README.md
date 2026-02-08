@@ -1,13 +1,13 @@
 # 🍳 Web Resep Interaktif (HTML + JS)
 
-[![Demo](https://img.shields.io/badge/Demo-Online-brightgreen)](https://resep.nguprus.my.id)
+[![Demo](https://img.shields.io/badge/Demo-Online-brightgreen)](https://dimsum.nguprus.my.id)
 ![HTML](https://img.shields.io/badge/HTML-5-orange)
 ![CSS](https://img.shields.io/badge/CSS-3-blue)
 ![JavaScript](https://img.shields.io/badge/JavaScript-Vanilla-yellow)
 ![License](https://img.shields.io/badge/License-Free-success)
 
 🌐 **Live Demo:**  
-👉 https://resep.nguprus.my.id
+👉 https://dimsum.nguprus.my.id
 
 ---
 

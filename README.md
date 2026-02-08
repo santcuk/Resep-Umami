@@ -26,8 +26,7 @@ Cocok untuk:
 
 ## 📸 Screenshot
 
-![Home](assets/home.png)
-![Resep](assets/resep.png)
+![Home](assets/home.png) ![Resep](assets/resep.png)
 
 ---
 

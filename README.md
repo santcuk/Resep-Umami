@@ -26,18 +26,8 @@ Cocok untuk:
 
 ## 📸 Screenshot
 
-Simpan gambar di folder:
-
-```
-/assets/
-```
-
-Lalu tampilkan:
-
-```md
 ![Home](assets/home.png)
 ![Resep](assets/resep.png)
-```
 
 ---
 

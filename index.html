@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Menu Resep</title>
+
+<style>
+*{ box-sizing:border-box }
+
+body{
+  margin:0;
+  font-family:Arial, sans-serif;
+  background:#f4f4f4;
+}
+
+/* HEADER */
+.header{
+  background:#2ecc71;
+  color:white;
+  padding:18px;
+  text-align:center;
+  font-size:20px;
+  font-weight:bold;
+}
+
+/* SEARCH */
+.search-box{ padding:12px }
+.search-box input{
+  width:100%;
+  padding:10px;
+  border-radius:10px;
+  border:1px solid #ddd;
+}
+
+/* KATEGORI */
+.kategori{
+  display:flex;
+  gap:8px;
+  overflow:auto;
+  padding:8px 12px;
+}
+.kategori button{
+  background:#2ecc71;
+  color:white;
+  border:none;
+  padding:6px 12px;
+  border-radius:20px;
+  font-size:12px;
+}
+.kategori button.inactive{ background:#ccc }
+
+/* LIST */
+.container{ padding:12px }
+
+.card{
+  background:white;
+  border-radius:12px;
+  padding:14px;
+  margin-bottom:10px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  box-shadow:0 2px 6px rgba(0,0,0,.08);
+  cursor:pointer;
+}
+.card button{
+  background:#2ecc71;
+  color:white;
+  border:none;
+  padding:6px 12px;
+  border-radius:8px;
+}
+
+/* PAGINATION */
+.pagination{
+  display:flex;
+  justify-content:center;
+  gap:6px;
+  margin:12px 0;
+}
+.pagination button{
+  background:#2ecc71;
+  color:white;
+  border:none;
+  padding:6px 10px;
+  border-radius:6px;
+}
+.pagination button.active{
+  background:#27ae60;
+}
+
+/* INFO */
+.info{
+  background:white;
+  border-radius:12px;
+  padding:14px;
+  margin:16px 12px 20px;
+  box-shadow:0 2px 6px rgba(0,0,0,.08);
+  font-size:13px;
+}
+
+.loading{
+  text-align:center;
+  padding:20px;
+  color:#888;
+}
+</style>
+</head>
+<body>
+
+<div class="header">📖 Menu Resep</div>
+
+<div class="search-box">
+  <input type="text" id="search" placeholder="Cari resep...">
+</div>
+
+<div class="kategori" id="kategoriBar"></div>
+
+<div class="container" id="listResep"></div>
+
+<div class="pagination" id="pagination"></div>
+
+<div class="info">
+<b>ℹ️ Informasi</b><br>
+• Maks 10 resep per halaman<br>
+• Gunakan kategori & pencarian<br>
+• Tambah resep cukup edit file resep-data.js
+</div>
+
+<!-- 🔥 LOAD FILE JSON DULU -->
+<script src="resep-data.js"></script>
+
+<script>
+const list=document.getElementById("listResep");
+const kategoriBar=document.getElementById("kategoriBar");
+const pagination=document.getElementById("pagination");
+const search=document.getElementById("search");
+
+let kategoriAktif="Semua";
+let halaman=1;
+const perPage=10;
+let timer;
+
+/* ==== parsing data dari file eksternal ==== */
+let data=[];
+for(const nama in daftarResep){
+  const [path,kategori]=daftarResep[nama].split("|");
+  data.push({
+    nama,
+    path:path.trim(),
+    kategori:kategori.trim().split(",").map(k=>k.trim())
+  });
+}
+
+/* ==== kategori ==== */
+const semuaKategori=new Set(["Semua"]);
+data.forEach(r=>r.kategori.forEach(k=>semuaKategori.add(k)));
+
+semuaKategori.forEach(k=>{
+  const btn=document.createElement("button");
+  btn.innerText=k;
+  btn.onclick=()=>{
+    kategoriAktif=k;
+    halaman=1;
+    [...kategoriBar.children].forEach(b=>b.classList.add("inactive"));
+    btn.classList.remove("inactive");
+    render(search.value);
+  };
+  kategoriBar.appendChild(btn);
+});
+
+/* ==== render ==== */
+function render(keyword=""){
+  list.innerHTML="";
+  pagination.innerHTML="";
+
+  let filtered=data.filter(r=>{
+    return r.nama.toLowerCase().includes(keyword.toLowerCase()) &&
+           (kategoriAktif==="Semua"||r.kategori.includes(kategoriAktif));
+  });
+
+  if(filtered.length===0){
+    list.innerHTML="<div class='loading'>Tidak ditemukan</div>";
+    return;
+  }
+
+  const totalPage=Math.ceil(filtered.length/perPage);
+  const start=(halaman-1)*perPage;
+  const pageData=filtered.slice(start,start+perPage);
+
+  pageData.forEach(r=>{
+    const card=document.createElement("div");
+    card.className="card";
+    card.innerHTML=`<span>${r.nama}</span><button>Buka</button>`;
+    card.onclick=()=>window.location.href=r.path;
+    list.appendChild(card);
+  });
+
+  if(totalPage>1){
+    const prev=document.createElement("button");
+    prev.innerText="<";
+    prev.onclick=()=>{if(halaman>1){halaman--;render(keyword)}};
+    pagination.appendChild(prev);
+
+    for(let i=1;i<=totalPage;i++){
+      const b=document.createElement("button");
+      b.innerText=i;
+      if(i===halaman)b.classList.add("active");
+      b.onclick=()=>{halaman=i;render(keyword)};
+      pagination.appendChild(b);
+    }
+
+    const next=document.createElement("button");
+    next.innerText=">";
+    next.onclick=()=>{if(halaman<totalPage){halaman++;render(keyword)}};
+    pagination.appendChild(next);
+  }
+}
+
+/* ==== search ==== */
+search.oninput=function(){
+  clearTimeout(timer);
+  list.innerHTML="<div class='loading'>⏳ Mencari resep...</div>";
+  timer=setTimeout(()=>{halaman=1;render(search.value)},1000);
+};
+
+render();
+</script>
+
+</body>
+</html>

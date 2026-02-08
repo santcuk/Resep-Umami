@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+<title>Saus Nashville Cheese</title>
+
+<!-- Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+
+<style>
+/* ================= FONT ================= */
+@font-face{
+  font-family:"More Sugar";
+  src:url("fonts/MoreSugar.ttf");
+}
+
+*{
+  box-sizing:border-box;
+  font-family:"More Sugar", cursive;
+}
+
+/* ================= THEME ================= */
+:root{
+  --merah:#d62828;
+  --kuning:#ffd60a;
+}
+
+/* ================= BODY ================= */
+body{
+  margin:0;
+  background:var(--merah);
+  color:var(--merah);
+}
+
+a{ color:inherit; text-decoration:none; }
+
+/* ================= HEADER ================= */
+.header{
+  position:sticky;
+  top:0;
+  height:56px;
+
+  display:grid;
+  grid-template-columns:60px 1fr 60px;
+  align-items:center;
+
+  background:var(--merah);
+  color:var(--kuning);
+  font-weight:bold;
+}
+
+.header .left,
+.header .right{
+  text-align:center;
+  font-size:20px;
+  cursor:pointer;
+}
+
+.header .title{
+  text-align:center;
+}
+
+/* ================= DRAWER ================= */
+.drawer{
+  position:fixed;
+  top:0;
+  right:-260px;
+  width:240px;
+  height:100%;
+  background:var(--kuning);
+  padding:20px;
+  transition:.3s;
+  z-index:10;
+}
+
+.drawer.active{ right:0; }
+
+.drawer a{
+  display:flex;
+  gap:10px;
+  padding:10px 0;
+  font-weight:bold;
+}
+
+.drawer hr{
+  border:none;
+  border-top:2px solid var(--merah);
+  opacity:.2;
+}
+
+.overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.4);
+  display:none;
+}
+.overlay.show{ display:block; }
+
+/* ================= CONTENT ================= */
+.container{
+  padding:16px;
+}
+
+/* ================= CARD ================= */
+.box{
+  background:var(--kuning);
+  border-radius:18px;
+  padding:14px;
+  margin-bottom:10px;
+
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+
+  font-weight:bold;
+  box-shadow:0 5px 10px rgba(0,0,0,.25);
+}
+
+/* ================= BUTTON ================= */
+button{
+  background:var(--merah);
+  color:var(--kuning);
+  border:none;
+  padding:7px 14px;
+  border-radius:12px;
+  cursor:pointer;
+  transition:.08s;
+}
+
+button:active{
+  transform:scale(.85);
+}
+
+/* ================= FOOTER ================= */
+.footer{
+  display:flex;
+  gap:10px;
+  margin-top:18px;
+}
+.footer button{ flex:1; }
+
+/* ================= PRINT ================= */
+@media print{
+  .header,.drawer,.overlay,button{ display:none }
+  body{ background:white; color:black }
+}
+</style>
+</head>
+
+<body>
+
+<!-- Drawer -->
+<div class="drawer" id="drawer"></div>
+<div class="overlay" id="overlay" onclick="toggleDrawer()"></div>
+
+<!-- Header -->
+<div class="header">
+  <div class="left" onclick="goHome()">
+    <i class="fa-solid fa-house"></i>
+  </div>
+
+  <div class="title">Saus Nashville Cheese</div>
+
+  <div class="right" onclick="toggleDrawer()">
+    <i class="fa-solid fa-bars"></i>
+  </div>
+</div>
+
+<!-- Content -->
+<div class="container">
+
+  <div id="listResep"></div>
+
+  <div class="footer">
+    <button onclick="resetResep()">Reset</button>
+    <button onclick="window.print()">Cetak</button>
+  </div>
+
+</div>
+
+<!-- LOAD MENU -->
+<script src="data/menu-data.js"></script>
+
+<script>
+/* ===== BUILD DRAWER ===== */
+const drawer=document.getElementById("drawer");
+
+menuItems.forEach(item=>{
+  if(item.type==="divider"){
+    drawer.innerHTML+="<hr>";
+    return;
+  }
+
+  drawer.innerHTML+=`
+    <a href="${item.link}" target="_blank">
+      <i class="fa ${item.icon}"></i> ${item.label}
+    </a>
+  `;
+});
+
+function toggleDrawer(){
+  drawer.classList.toggle("active");
+  overlay.classList.toggle("show");
+}
+
+function goHome(){
+  window.location.href="index.html";
+}
+
+/* ================= RESEP ================= */
+
+let faktor = 1;
+
+const bahan = [
+ ["Cabai Bubuk (Sendok 2,5)", 1],
+ ["Bawang Putih Bubuk<br/>(Sendok 1,25)", 1],
+ ["Lada Putih (Sendok 1,25)", 0.5],
+ ["Paprika Bubuk (Sendok 1,25)", 1],
+ ["Saus Hot Lava (gr)", 30],
+ ["Saus BBQ (gr)", 10],
+ ["Saus Extrapedas Gourmet (gr)", 60],
+ ["Saus Keju Gourmet (gr)", 15]
+];
+
+function render(){
+  const div=document.getElementById("listResep");
+  div.innerHTML="";
+
+  bahan.forEach((b,i)=>{
+    const hasil=b[1]*faktor;
+
+    div.innerHTML+=`
+      <div class="box">
+        <span>${b[0]}</span>
+        <span>${hasil.toFixed(2)}</span>
+        <button onclick="edit(${i})">Edit</button>
+      </div>
+    `;
+  });
+}
+
+function edit(i){
+  const val=prompt("Nilai baru:");
+  if(!val)return;
+
+  faktor = val/bahan[i][1];
+  render();
+}
+
+function resetResep(){
+  faktor=1;
+  render();
+}
+
+render();
+</script>
+
+</body>
+</html>
